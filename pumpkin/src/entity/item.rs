@@ -82,7 +82,15 @@ impl EntityBase for ItemEntity {
             || (age + entity.entity_id as u32) % 4 == 0
         {
             let no_clip = true;
-            println!("space: {}", entity.world.read().await.is_space_empty(entity.bounding_box.load()).await);
+            println!(
+                "space: {}",
+                entity
+                    .world
+                    .read()
+                    .await
+                    .is_space_empty(entity.bounding_box.load())
+                    .await
+            );
             entity.move_entity(velocity, no_clip);
             entity.tick_block_collision();
 

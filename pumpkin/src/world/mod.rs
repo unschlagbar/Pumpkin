@@ -1655,16 +1655,8 @@ impl World {
         let mut vec = Vec::new();
 
         let diff = to_box.min.sub(&from_box.min);
-        let from_pos = BlockPos::floored(
-            from_box.min.x,
-            from_box.min.y,
-            from_box.min.z,
-        );
-        let to_pos = BlockPos::floored(
-            to_box.min.x,
-            to_box.min.y,
-            to_box.min.z,
-        );
+        let from_pos = BlockPos::floored(from_box.min.x, from_box.min.y, from_box.min.z);
+        let to_pos = BlockPos::floored(to_box.min.x, to_box.min.y, to_box.min.z);
 
         if diff.length_squared() < 0.9999 {
             for x in from_pos.0.x..=to_pos.0.x {

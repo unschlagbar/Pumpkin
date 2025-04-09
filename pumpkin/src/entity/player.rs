@@ -1235,8 +1235,8 @@ impl Player {
             EntityType::ITEM,
         );
 
-        let pitch = (self.living_entity.entity.pitch.load() as f64).to_radians();
-        let yaw = (self.living_entity.entity.yaw.load() as f64).to_radians();
+        let pitch = f64::from(self.living_entity.entity.pitch.load()).to_radians();
+        let yaw = f64::from(self.living_entity.entity.yaw.load()).to_radians();
         let pitch_sin = pitch.sin();
         let pitch_cos = pitch.cos();
         let yaw_sin = yaw.sin();
