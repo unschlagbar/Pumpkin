@@ -73,6 +73,30 @@ impl BoundingBox {
             && self.max.z > other.min.z
     }
 
+    pub fn stretch(&self, other: Vector3<f64>) -> Self {
+        let mut new = *self;
+    
+        if other.x < 0.0 {
+            new.min.x += other.x;
+        } else if other.x > 0.0 {
+            new.max.x += other.x;
+        }
+
+        if other.y < 0.0 {
+            new.min.y += other.y;
+        } else if other.y > 0.0 {
+            new.max.y += other.y;
+        }
+
+        if other.z < 0.0 {
+            new.min.z += other.z;
+        } else if other.z > 0.0 {
+            new.max.z += other.z;
+        }
+
+        new
+    }
+
     pub fn squared_magnitude(&self, pos: Vector3<f64>) -> f64 {
         let d = f64::max(f64::max(self.min.x - pos.x, pos.x - self.max.x), 0.0);
         let e = f64::max(f64::max(self.min.y - pos.y, pos.y - self.max.y), 0.0);

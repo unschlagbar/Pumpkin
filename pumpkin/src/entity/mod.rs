@@ -1,14 +1,13 @@
 use crate::server::Server;
 use async_trait::async_trait;
 use bytes::BufMut;
+use pumpkin_world::block::BlockDirection;
 use core::f32;
 use crossbeam::atomic::AtomicCell;
 use living::LivingEntity;
 use player::Player;
 use pumpkin_data::{
-    damage::DamageType,
-    entity::{EntityPose, EntityType},
-    sound::{Sound, SoundCategory},
+    block_properties::Axis, damage::DamageType, entity::{EntityPose, EntityType}, sound::{Sound, SoundCategory}, CollisionShape
 };
 use pumpkin_nbt::{compound::NbtCompound, tag::NbtTag};
 use pumpkin_protocol::{
@@ -20,12 +19,7 @@ use pumpkin_protocol::{
     ser::serializer::Serializer,
 };
 use pumpkin_util::math::{
-    boundingbox::{BoundingBox, EntityDimensions},
-    get_section_cord,
-    position::BlockPos,
-    vector2::Vector2,
-    vector3::Vector3,
-    wrap_degrees,
+    boundingbox::{BoundingBox, EntityDimensions}, get_section_cord, position::BlockPos, vector2::Vector2, vector3::Vector3, wrap_degrees
 };
 use serde::Serialize;
 use std::sync::{
@@ -430,7 +424,45 @@ impl Entity {
             self.set_pos(pos);
         } else {
             // this.movementMultiplier.lengthSquared() > 1.0E-7
+            let pos = self.pos.load().add(&movement);
+            self.set_pos(pos);
         }
+    }
+
+    async fn adjust_movement_for_collisions(&self, movement: Vector3<f64>) -> Vector3<f64> {
+        if movement.length_squared() == 0.0 {
+            return movement;
+        }
+        let collisions = self.world.read().await.get_block_collisions(self.bounding_box.load().stretch(movement)).await;
+
+        if collisions.is_empty() {
+            return movement;
+        }
+
+        for axis in get_axis_order(movement) {
+            let value = match axis {
+                Axis::X => movement.x,
+                Axis::Y => movement.y,
+                Axis::Z => movement.z,
+            };
+
+            if value != 0.0 {
+
+            }
+        }
+
+
+        let bl = false;
+        let bl3 = false;
+        let bl4 = false;
+
+
+        // Todo! Replace 0.0 with stephight
+        if 0.0 > 0.0 && (bl4 || self.on_ground.load(Relaxed)) && (bl || bl3) {
+
+        }
+
+        movement
     }
 
     fn tick_block_collision(&self) {
@@ -439,6 +471,46 @@ impl Entity {
             //let pos = self.pos.load();
             //let block_pos = BlockPos::floored(pos.x, pos.y - 0.50001, pos.z);
             //;
+        }
+    }
+
+    async fn push_out_of_blocks(&self, velocity: &mut Vector3<f64>, pos: Vector3<f64>) {
+        let block_pos = BlockPos::floored(pos.x, pos.y, pos.z);
+        let fraction = Vector3::new(pos.x - block_pos.0.x as f64, pos.y - block_pos.0.y as f64, pos.z - block_pos.0.z as f64);
+        let mut final_dir = BlockDirection::Up;
+        let mut g = f64::MAX;
+  
+        for direction in BlockDirection::horizontal_up() {
+            let offset_pos = block_pos.offset(direction.to_offset());
+            if !self.world.read().await.get_block_state(&offset_pos).await.unwrap().is_full_cube() {
+                let h = match direction.to_axis() {
+                    Axis::X => fraction.x,
+                    Axis::Y => fraction.y,
+                    Axis::Z => fraction.z,
+                };
+                let i = if direction.positive() {
+                    1.0 - h 
+                } else {
+                    h
+                };
+
+                if i < g {
+                    g = i;
+                    final_dir = direction;
+                }
+            }
+        }
+
+        println!("final_dir: {:?}", final_dir);
+  
+        let offset = rand::random::<f64>() * 0.2 + 0.1;
+        let sign = final_dir.sign_f();
+        let lv6 = velocity.multiply(0.75, 0.75, 0.75);
+
+        match final_dir.to_axis() {
+            Axis::X => *velocity = Vector3::new(sign * offset, lv6.y, lv6.z),
+            Axis::Y => *velocity = Vector3::new(lv6.x, sign * offset, lv6.z),
+            Axis::Z => *velocity = Vector3::new(lv6.x, lv6.y, sign * offset),
         }
     }
 
@@ -559,4 +631,25 @@ pub enum Flag {
     Glowing = 6,
     /// Indicates if the entity is flying due to a fall.
     FallFlying = 7,
+}
+
+fn get_axis_order(movement: Vector3<f64>) -> [Axis; 3] {
+    if movement.x.abs() < movement.z.abs() {
+        [Axis::Y, Axis::Z, Axis::X]
+    } else {
+        [Axis::Y, Axis::X, Axis::Z]
+    }
+}
+
+fn calculate_max_offset(axis: Axis, bounding_box: &BoundingBox, shapes: Vec<CollisionShape>, max_dist: f64) -> f64 {
+    let mut max_dist = max_dist;
+    for shape in shapes {
+        if max_dist.abs() < 1.0E-7 {
+            return 0.0;
+        }
+
+        max_dist = shape.calculate_max_distance(axis, bounding_box, max_dist);
+    }
+
+    return max_dist;
 }

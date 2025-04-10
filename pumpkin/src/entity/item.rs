@@ -68,29 +68,19 @@ impl EntityBase for ItemEntity {
             entity.remove().await;
         }
 
+        let pos = entity.pos.load();
         let mut velocity = entity.velocity.load();
+        velocity.y -= 0.04;
 
-        if entity.pos.load().y > 99.9 {
-            velocity.y -= 0.04;
-            entity.on_ground.store(false, Relaxed);
-        } else {
-            entity.on_ground.store(true, Relaxed);
+        let no_clip = !entity.world.read().await.is_space_empty(entity.bounding_box.load()).await;
+
+        if no_clip {
+            entity.push_out_of_blocks(&mut velocity, Vector3::new(pos.x, entity.bounding_box_size.load().height as f64 / 2.0, pos.z)).await;
+            entity.set_velocity(velocity).await;
         }
 
-        if !entity.on_ground.load(Relaxed)
-            || velocity.horizontal_length_squared() > 1.0E-5
-            || (age + entity.entity_id as u32) % 4 == 0
-        {
-            let no_clip = true;
-            println!(
-                "space: {}",
-                entity
-                    .world
-                    .read()
-                    .await
-                    .is_space_empty(entity.bounding_box.load())
-                    .await
-            );
+
+        if !entity.on_ground.load(Relaxed) || velocity.horizontal_length_squared() > 1.0E-5 || (age + entity.entity_id as u32) % 4 == 0 {
             entity.move_entity(velocity, no_clip);
             entity.tick_block_collision();
 
@@ -109,29 +99,18 @@ impl EntityBase for ItemEntity {
                     .slipperiness as f64;
             }
 
-            println!("friction: {}", friction);
+            //println!("friction: {}, {:.2}", friction, entity.pos.load().y);
 
             velocity = velocity.multiply(friction, 0.98, friction);
 
-            if entity.on_ground.load(Relaxed) && velocity.y < 0.1 {
+            if entity.on_ground.load(Relaxed) && velocity.y < 0.0 {
                 velocity.y *= -0.5;
             }
         }
 
         entity.velocity.store(velocity);
 
-        entity
-            .world
-            .read()
-            .await
-            .spawn_particle(
-                entity.pos.load(),
-                Vector3::new(0.0, 0.0, 0.0),
-                0.1,
-                7,
-                pumpkin_data::particle::Particle::DustPlume,
-            )
-            .await;
+        entity.world.read().await.spawn_particle(entity.pos.load(), Vector3::new(0.0, 0.0, 0.0), 0.2, 7, pumpkin_data::particle::Particle::DustPlume).await;
     }
 
     async fn damage(&self, _amount: f32, _damage_type: DamageType) -> bool {
