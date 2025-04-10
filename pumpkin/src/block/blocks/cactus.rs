@@ -88,6 +88,6 @@ impl PumpkinBlock for CactusBlock {
         let block = world.get_block(&pos.down()).await.unwrap();
         // TODO: use tags
         (block == Block::CACTUS || block.is_tagged_with("minecraft:sand").unwrap())
-            && !world.get_block_state(&pos.up()).await.unwrap().is_liquid
+            && !world.get_block_state(&pos.up()).await.unwrap().is_liquid()
     }
 }
