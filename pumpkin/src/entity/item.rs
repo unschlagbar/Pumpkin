@@ -72,15 +72,31 @@ impl EntityBase for ItemEntity {
         let mut velocity = entity.velocity.load();
         velocity.y -= 0.04;
 
-        let no_clip = !entity.world.read().await.is_space_empty(entity.bounding_box.load()).await;
+        let no_clip = !entity
+            .world
+            .read()
+            .await
+            .is_space_empty(entity.bounding_box.load())
+            .await;
 
         if no_clip {
-            entity.push_out_of_blocks(&mut velocity, Vector3::new(pos.x, entity.bounding_box_size.load().height as f64 / 2.0, pos.z)).await;
+            entity
+                .push_out_of_blocks(
+                    &mut velocity,
+                    Vector3::new(
+                        pos.x,
+                        entity.bounding_box_size.load().height as f64 / 2.0,
+                        pos.z,
+                    ),
+                )
+                .await;
             entity.set_velocity(velocity).await;
         }
 
-
-        if !entity.on_ground.load(Relaxed) || velocity.horizontal_length_squared() > 1.0E-5 || (age + entity.entity_id as u32) % 4 == 0 {
+        if !entity.on_ground.load(Relaxed)
+            || velocity.horizontal_length_squared() > 1.0E-5
+            || (age + entity.entity_id as u32) % 4 == 0
+        {
             entity.move_entity(velocity, no_clip);
             entity.tick_block_collision();
 
@@ -110,7 +126,18 @@ impl EntityBase for ItemEntity {
 
         entity.velocity.store(velocity);
 
-        entity.world.read().await.spawn_particle(entity.pos.load(), Vector3::new(0.0, 0.0, 0.0), 0.2, 7, pumpkin_data::particle::Particle::DustPlume).await;
+        entity
+            .world
+            .read()
+            .await
+            .spawn_particle(
+                entity.pos.load(),
+                Vector3::new(0.0, 0.0, 0.0),
+                0.2,
+                7,
+                pumpkin_data::particle::Particle::DustPlume,
+            )
+            .await;
     }
 
     async fn damage(&self, _amount: f32, _damage_type: DamageType) -> bool {

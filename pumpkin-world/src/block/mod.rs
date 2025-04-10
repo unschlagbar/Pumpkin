@@ -208,7 +208,7 @@ impl BlockDirection {
             BlockDirection::North => -1.0,
             BlockDirection::West => -1.0,
             BlockDirection::Down => -1.0,
-        } 
+        }
     }
 }
 

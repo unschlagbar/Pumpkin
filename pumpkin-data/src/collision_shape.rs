@@ -17,9 +17,12 @@ impl CollisionShape {
         let box_min = bounding_box.min;
         let box_max = bounding_box.max;
 
-        !(self.max.x < box_min.x || self.min.x > box_max.x ||
-          self.max.y < box_min.y || self.min.y > box_max.y ||
-          self.max.z < box_min.z || self.min.z > box_max.z)
+        !(self.max.x < box_min.x
+            || self.min.x > box_max.x
+            || self.max.y < box_min.y
+            || self.min.y > box_max.y
+            || self.max.z < box_min.z
+            || self.min.z > box_max.z)
     }
 
     pub fn add_pos(&self, pos: BlockPos) -> Self {
@@ -29,7 +32,12 @@ impl CollisionShape {
         }
     }
 
-    pub fn calculate_max_distance(&self, axis: Axis, bounding_box: &BoundingBox, max_dist: f64) -> f64 {
+    pub fn calculate_max_distance(
+        &self,
+        axis: Axis,
+        bounding_box: &BoundingBox,
+        max_dist: f64,
+    ) -> f64 {
         let cycle = AxisCycle::between(axis, Axis::X).opposite();
         let lv2 = cycle.cycle(Axis::X);
         let lv3 = cycle.cycle(Axis::Y);

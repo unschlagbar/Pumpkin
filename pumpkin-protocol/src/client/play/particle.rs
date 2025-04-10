@@ -1,8 +1,8 @@
+use crate::ser::network_serialize_no_prefix;
 use pumpkin_data::packet::clientbound::PLAY_LEVEL_PARTICLES;
 use pumpkin_macros::packet;
 use pumpkin_util::math::vector3::Vector3;
 use serde::{self, Serialize};
-use crate::ser::network_serialize_no_prefix;
 
 use crate::VarInt;
 

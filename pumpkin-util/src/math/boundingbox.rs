@@ -75,7 +75,7 @@ impl BoundingBox {
 
     pub fn stretch(&self, other: Vector3<f64>) -> Self {
         let mut new = *self;
-    
+
         if other.x < 0.0 {
             new.min.x += other.x;
         } else if other.x > 0.0 {
