@@ -26,15 +26,9 @@ use bytes::Bytes;
 use explosion::Explosion;
 use pumpkin_config::BasicConfiguration;
 use pumpkin_data::{
-    Block,
     block_properties::{
-        get_block_and_state_by_state_id, get_block_by_state_id, get_state_by_state_id,
-    },
-    entity::{EntityStatus, EntityType},
-    fluid::Fluid,
-    particle::Particle,
-    sound::{Sound, SoundCategory},
-    world::{RAW, WorldEvent},
+        get_block_and_state_by_state_id, get_block_by_state_id, get_state_by_state_id, COLLISION_SHAPES,
+    }, entity::{EntityStatus, EntityType}, fluid::Fluid, particle::Particle, sound::{Sound, SoundCategory}, world::{WorldEvent, RAW}, Block, CollisionShape
 };
 use pumpkin_macros::send_cancellable;
 use pumpkin_nbt::to_bytes_unnamed;
@@ -56,7 +50,7 @@ use pumpkin_protocol::{
     codec::var_int::VarInt,
 };
 use pumpkin_registry::DimensionType;
-use pumpkin_util::math::{position::BlockPos, vector3::Vector3};
+use pumpkin_util::math::{boundingbox::BoundingBox, position::BlockPos, vector3::Vector3};
 use pumpkin_util::math::{position::chunk_section_from_pos, vector2::Vector2};
 use pumpkin_util::text::{TextComponent, color::NamedColor};
 use pumpkin_world::{
@@ -1685,4 +1679,93 @@ impl World {
         chunk.block_entities.remove(block_pos);
         chunk.dirty = true;
     }
+
+    pub async fn get_block_collisions(
+        self: &Arc<Self>,
+        bounding_box: BoundingBox,
+    ) -> Vec<CollisionShape> {
+        let mut vec = Vec::new();
+
+        let min = BlockPos::new(
+            bounding_box.min.x.floor() as i32,
+            bounding_box.min.y.floor() as i32,
+            bounding_box.min.z.floor() as i32,
+        );
+        let max = BlockPos::new(
+            bounding_box.max.x.floor() as i32,
+            bounding_box.max.y.floor() as i32,
+            bounding_box.max.z.floor() as i32,
+        );
+
+        for x in min.0.x..=max.0.x {
+            for y in min.0.y..=max.0.y {
+                for z in min.0.z..=max.0.z {
+                    let block_pos = BlockPos::new(x, y, z);
+                    if let Ok(block) = self.get_block_state(&block_pos).await {
+                        if block.is_full_cube() {
+                            vec.push(
+                                COLLISION_SHAPES[block.collision_shapes[0] as usize]
+                                    .at_pos(block_pos),
+                            );
+                        }
+
+                        if block.collision_shapes.is_empty() {
+                            continue;
+                        }
+
+                        for shape in block.collision_shapes {
+                            let collision_shape =
+                                COLLISION_SHAPES[*shape as usize].at_pos(block_pos);
+                            if collision_shape.intersects(&bounding_box) {
+                                vec.push(collision_shape);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        vec
+    }
+
+    pub async fn is_space_empty(self: &Arc<Self>, bounding_box: BoundingBox) -> bool {
+        let min = BlockPos::new(
+            bounding_box.min.x.floor() as i32,
+            bounding_box.min.y.floor() as i32,
+            bounding_box.min.z.floor() as i32,
+        );
+        let max = BlockPos::new(
+            bounding_box.max.x.floor() as i32,
+            bounding_box.max.y.floor() as i32,
+            bounding_box.max.z.floor() as i32,
+        );
+
+        for x in min.0.x..=max.0.x {
+            for y in min.0.y..=max.0.y {
+                for z in min.0.z..=max.0.z {
+                    let block_pos = BlockPos::new(x, y, z);
+                    if let Ok(block) = self.get_block_state(&block_pos).await {
+                        if block.is_full_cube() {
+                            return false;
+                        }
+
+                        if block.collision_shapes.is_empty() {
+                            continue;
+                        }
+
+                        for shape in block.collision_shapes {
+                            let collision_shape = COLLISION_SHAPES[*shape as usize];
+                            if collision_shape.at_pos(block_pos).intersects(&bounding_box) {
+                                return false;
+                            }
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        true
+    }
+
 }

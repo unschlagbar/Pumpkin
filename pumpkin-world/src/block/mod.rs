@@ -107,6 +107,16 @@ impl BlockDirection {
         ]
     }
 
+    pub fn horizontal_up() -> [BlockDirection; 5] {
+        [
+            BlockDirection::North,
+            BlockDirection::South,
+            BlockDirection::West,
+            BlockDirection::East,
+            BlockDirection::Up,
+        ]
+    }
+
     pub fn is_horizontal(&self) -> bool {
         matches!(
             self,
@@ -175,6 +185,24 @@ impl BlockDirection {
             BlockDirection::West => BlockDirection::North,
             BlockDirection::Up => BlockDirection::East,
             BlockDirection::Down => BlockDirection::West,
+        }
+    }
+
+    pub fn is_positive(&self) -> bool {
+        match self {
+            BlockDirection::Up => true,
+            BlockDirection::South => true,
+            BlockDirection::East => true,
+            _ => false
+        }
+    }
+
+    pub fn sign_f64(&self) -> f64 {
+        match self {
+            BlockDirection::Up => 1.0,
+            BlockDirection::South => 1.0,
+            BlockDirection::East => 1.0,
+            _ => -1.0
         }
     }
 }

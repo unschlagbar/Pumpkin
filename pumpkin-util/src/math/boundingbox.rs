@@ -26,10 +26,17 @@ impl BoundingBox {
         }
     }
 
-    pub fn offset(&self, other: Self) -> Self {
+    pub fn offset_box(&self, other: Self) -> Self {
         Self {
             min: self.min.add(&other.min),
             max: self.max.add(&other.max),
+        }
+    }
+
+    pub fn offset(&self, other: Vector3<f64>) -> Self {
+        Self {
+            min: self.min.add(&other),
+            max: self.max.add(&other),
         }
     }
 
@@ -78,6 +85,31 @@ impl BoundingBox {
         let e = f64::max(f64::max(self.min.y - pos.y, pos.y - self.max.y), 0.0);
         let f = f64::max(f64::max(self.min.z - pos.z, pos.z - self.max.z), 0.0);
         super::squared_magnitude(d, e, f)
+    }
+
+    pub fn stretch(&self, other: Vector3<f64>) -> Self {
+        let mut min = self.min;
+        let mut max = self.max;
+
+        if other.x < 0.0 {
+            min.x += other.x;
+        } else if other.x > 0.0 {
+            max.x += other.x;
+        }
+   
+        if other.y < 0.0 {
+            min.y += other.y;
+        } else if other.y > 0.0 {
+            max.y += other.y;
+        }
+   
+        if other.z < 0.0 {
+            min.z += other.z;
+        } else if other.z > 0.0 {
+            max.z += other.z;
+        }
+
+        Self { min, max }
     }
 }
 

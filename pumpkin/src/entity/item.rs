@@ -9,7 +9,7 @@ use pumpkin_protocol::{
     client::play::{CTakeItemEntity, MetaDataType, Metadata},
     codec::item_stack_seralizer::ItemStackSerializer,
 };
-use pumpkin_util::math::vector3::Vector3;
+use pumpkin_util::math::{position::BlockPos, vector3::Vector3};
 use pumpkin_world::item::ItemStack;
 use tokio::sync::Mutex;
 
@@ -71,6 +71,42 @@ impl EntityBase for ItemEntity {
         if age >= 6000 {
             entity.remove().await;
         }
+
+        let mut velocity = entity.velocity.load();
+        let pos = entity.pos.load();
+        velocity.y =- 0.4;
+
+        //let no_clip = !entity.world.read().await.is_space_empty(entity.bounding_box.load()).await;
+        let no_clip = false;
+
+        if no_clip {
+            //entity.push_out_of_blocks(&mut velocity, pos).await;
+        }
+
+        if !entity.on_ground.load(Relaxed) || velocity.horizontal_length_squared() > 1.0E-5 || (age as i32 + entity.entity_id) % 4 == 0 {
+            entity.move_entity(&mut velocity, no_clip).await;
+
+            let mut friction = 0.98;
+            if entity.on_ground.load(Relaxed) {
+                let block_pos = BlockPos::floored(pos.x, pos.y - 0.50001, pos.z);
+                friction *= entity.world.read().await.get_block(&block_pos).await.unwrap().slipperiness as f64;
+            }
+
+            velocity.multiply(friction, 1.0, friction);
+
+            if entity.on_ground.load(Relaxed) && velocity.y < 0.0 {
+                velocity.y *= -0.5;
+            }
+        }
+
+        if no_clip {
+            entity.set_velocity(velocity).await;
+        } else {
+            entity.velocity.store(velocity);
+        }
+
+
+        entity.world.read().await.spawn_particle(pos, Vector3 { x: 0.0, y: 0.0, z: 0.0 }, 0.3, 7, pumpkin_data::particle::Particle::DustPlume).await;
     }
 
     async fn damage(&self, _amount: f32, _damage_type: DamageType) -> bool {

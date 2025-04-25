@@ -1,12 +1,13 @@
 use crate::server::Server;
 use async_trait::async_trait;
 use bytes::BufMut;
+use pumpkin_world::block::BlockDirection;
 use core::f32;
 use crossbeam::atomic::AtomicCell;
 use living::LivingEntity;
 use player::Player;
 use pumpkin_data::{
-    block_properties::{Facing, HorizontalFacing},
+    block_properties::{Axis, Facing, HorizontalFacing},
     damage::DamageType,
     entity::{EntityPose, EntityType},
     sound::{Sound, SoundCategory},
@@ -472,6 +473,166 @@ impl Entity {
     pub fn is_invulnerable_to(&self, damage_type: &DamageType) -> bool {
         self.invulnerable.load(Relaxed) || self.damage_immunities.contains(damage_type)
     }
+
+    // move() in Java, but in Rust move is a keyword
+    async fn move_entity(&self, movement: &mut Vector3<f64>, no_clip: bool) {
+        if no_clip {
+            let pos = self.pos.load().add(&movement);
+            self.set_pos(pos);
+        } else {
+            // this.movementMultiplier.lengthSquared() > 1.0E-7
+
+            let lv2 = self.adjust_movement_for_collisions(*movement).await;
+            let d = lv2.length_squared();
+
+            if d > 1.0E-7 || movement.length_squared() - d < 1.0E-7 {
+    
+                let mut lv4 = self.pos.load();
+
+                for axis in Axis::get_check_order(lv2) {
+                    let e = match axis {
+                        Axis::X => lv2.x,
+                        Axis::Y => lv2.y,
+                        Axis::Z => lv2.z,
+                    };
+                    if e != 0.0 {
+                        match axis {
+                            Axis::X => lv4.x += e,
+                            Axis::Y => lv4.y += e,
+                            Axis::Z => lv4.z += e,
+                        }
+                    }
+                }
+    
+                self.set_pos(lv4);
+            }
+            
+            if movement.y != lv2.y && movement.y < 0.0 {
+                self.on_ground.store(true, Relaxed);
+            }
+            
+            let bl = movement.x != lv2.x;
+            let bl2 = movement.z != lv2.z;
+
+            if bl || bl2 {
+                *movement = Vector3::new(
+                    if bl { 0.0 } else { movement.x },
+                    movement.y,
+                    if bl2 { 0.0 } else { movement.z }
+                );
+            }
+        }
+    }
+
+    async fn adjust_movement_for_collisions(&self, movement: Vector3<f64>) -> Vector3<f64> {
+        if movement.length_squared() == 0.0 {
+            return movement;
+        }
+        let collisions = self
+            .world
+            .read()
+            .await
+            .get_block_collisions(self.bounding_box.load().stretch(movement))
+            .await;
+
+        if collisions.is_empty() {
+            return movement;
+        }
+
+        let bounding_box = self.bounding_box.load();
+        let mut new_move = Vector3::new(0.0, 0.0, 0.0);
+
+        for axis in Axis::get_check_order(movement) {
+            let value = match axis {
+                Axis::X => movement.x,
+                Axis::Y => movement.y,
+                Axis::Z => movement.z,
+            };
+
+            if value != 0.0 {
+                let mut max_dist = value;
+                for shape in &collisions {
+                    if max_dist.abs() < 1.0E-7 {
+                        max_dist = 0.0;
+                        break;
+                    }
+                    max_dist = shape.calculate_max_distance(axis, &bounding_box.offset(new_move), max_dist);
+                }
+                match axis {
+                    Axis::X => new_move.x = max_dist,
+                    Axis::Y => new_move.y = max_dist,
+                    Axis::Z => new_move.z = max_dist,
+                };
+            }
+        }
+
+        let bl = false;
+        let bl3 = false;
+        let bl4 = false;
+
+        // Todo! Replace 0.0 with stephight
+        if 0.0 > 0.0 && (bl4 || self.on_ground.load(Relaxed)) && (bl || bl3) {}
+
+        new_move
+    }
+
+    fn _tick_block_collision(&self) {
+        if self.on_ground.load(Relaxed) {
+            //Todo! Trigger on_stepped_on event
+            //let pos = self.pos.load();
+            //let block_pos = BlockPos::floored(pos.x, pos.y - 0.50001, pos.z);
+            //;
+        }
+    }
+
+    async fn push_out_of_blocks(&self, velocity: &mut Vector3<f64>, pos: Vector3<f64>) {
+        let block_pos = BlockPos::floored(pos.x, pos.y, pos.z);
+        let fraction = Vector3::new(
+            pos.x - block_pos.0.x as f64,
+            pos.y - block_pos.0.y as f64,
+            pos.z - block_pos.0.z as f64,
+        );
+        let mut final_dir = BlockDirection::Up;
+        let mut g = f64::MAX;
+
+        for direction in BlockDirection::horizontal_up() {
+            let offset_pos = block_pos.offset(direction.to_offset());
+            if !self
+                .world
+                .read()
+                .await
+                .get_block_state(&offset_pos)
+                .await
+                .unwrap()
+                .is_full_cube()
+            {
+                let h = match direction.to_axis() {
+                    Axis::X => fraction.x,
+                    Axis::Y => fraction.y,
+                    Axis::Z => fraction.z,
+                };
+                let i = if direction.is_positive() { 1.0 - h } else { h };
+
+                if i < g {
+                    g = i;
+                    final_dir = direction;
+                }
+            }
+        }
+
+        println!("final_dir: {:?}", final_dir);
+
+        let offset = rand::random::<f64>() * 0.2 + 0.1;
+        let sign = final_dir.sign_f64();
+        let lv6 = velocity.multiply(0.75, 0.75, 0.75);
+
+        match final_dir.to_axis() {
+            Axis::X => *velocity = Vector3::new(sign * offset, lv6.y, lv6.z),
+            Axis::Y => *velocity = Vector3::new(lv6.x, sign * offset, lv6.z),
+            Axis::Z => *velocity = Vector3::new(lv6.x, lv6.y, sign * offset),
+        }
+    }
+
 
     fn velocity_multiplier(_pos: Vector3<f64>) -> f32 {
         // let world = self.world.read().await;
