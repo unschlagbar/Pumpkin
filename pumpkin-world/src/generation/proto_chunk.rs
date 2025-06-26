@@ -861,7 +861,7 @@ mod test {
             .enumerate()
             .for_each(|(index, (expected, actual))| {
                 if expected != actual {
-                    panic!("{} vs {} ({})", expected, actual, index);
+                    panic!("{expected} vs {actual} ({index})");
                 }
             });
     }
@@ -918,7 +918,7 @@ mod test {
             .enumerate()
             .for_each(|(index, (expected, actual))| {
                 if expected != actual {
-                    panic!("{} vs {} ({})", expected, actual, index);
+                    panic!("{expected} vs {actual} ({index})");
                 }
             });
     }
@@ -975,7 +975,7 @@ mod test {
             .enumerate()
             .for_each(|(index, (expected, actual))| {
                 if expected != actual {
-                    panic!("{} vs {} ({})", expected, actual, index);
+                    panic!("{expected} vs {actual} ({index})");
                 }
             });
     }
@@ -1032,7 +1032,7 @@ mod test {
             .enumerate()
             .for_each(|(index, (expected, actual))| {
                 if expected != actual {
-                    panic!("{} vs {} ({})", expected, actual, index);
+                    panic!("{expected} vs {actual} ({index})");
                 }
             });
     }
@@ -1089,7 +1089,7 @@ mod test {
             .enumerate()
             .for_each(|(index, (expected, actual))| {
                 if expected != actual {
-                    panic!("{} vs {} ({})", expected, actual, index);
+                    panic!("{expected} vs {actual} ({index})");
                 }
             });
     }
@@ -1157,7 +1157,7 @@ mod test {
             .enumerate()
             .for_each(|(index, (expected, actual))| {
                 if expected != actual {
-                    panic!("expected {}, was {} (at {})", expected, actual, index);
+                    panic!("expected {expected}, was {actual} (at {index})");
                 }
             });
     }
@@ -1183,7 +1183,7 @@ mod test {
             .enumerate()
             .for_each(|(index, (expected, actual))| {
                 if expected != actual {
-                    panic!("expected {}, was {} (at {})", expected, actual, index);
+                    panic!("expected {expected}, was {actual} (at {index})");
                 }
             });
     }
@@ -1209,7 +1209,7 @@ mod test {
             .enumerate()
             .for_each(|(index, (expected, actual))| {
                 if expected != actual {
-                    panic!("expected {}, was {} (at {})", expected, actual, index);
+                    panic!("expected {expected}, was {actual} (at {index})");
                 }
             });
     }
@@ -1235,7 +1235,7 @@ mod test {
             .enumerate()
             .for_each(|(index, (expected, actual))| {
                 if expected != actual {
-                    panic!("expected {}, was {} (at {})", expected, actual, index);
+                    panic!("expected {expected}, was {actual} (at {index})");
                 }
             });
     }
@@ -1264,7 +1264,7 @@ mod test {
             .enumerate()
             .for_each(|(index, (expected, actual))| {
                 if expected != actual {
-                    panic!("expected {}, was {} (at {})", expected, actual, index);
+                    panic!("expected {expected}, was {actual} (at {index})");
                 }
             });
     }
@@ -1293,7 +1293,7 @@ mod test {
             .enumerate()
             .for_each(|(index, (expected, actual))| {
                 if expected != actual {
-                    panic!("expected {}, was {} (at {})", expected, actual, index);
+                    panic!("expected {expected}, was {actual} (at {index})");
                 }
             });
     }
@@ -1322,7 +1322,7 @@ mod test {
             .enumerate()
             .for_each(|(index, (expected, actual))| {
                 if expected != actual {
-                    panic!("expected {}, was {} (at {})", expected, actual, index);
+                    panic!("expected {expected}, was {actual} (at {index})");
                 }
             });
     }
@@ -1351,7 +1351,7 @@ mod test {
             .enumerate()
             .for_each(|(index, (expected, actual))| {
                 if expected != actual {
-                    panic!("expected {}, was {} (at {})", expected, actual, index);
+                    panic!("expected {expected}, was {actual} (at {index})");
                 }
             });
     }
@@ -1380,7 +1380,7 @@ mod test {
             .enumerate()
             .for_each(|(index, (expected, actual))| {
                 if expected != actual {
-                    panic!("expected {}, was {} (at {})", expected, actual, index);
+                    panic!("expected {expected}, was {actual} (at {index})");
                 }
             });
     }
@@ -1410,7 +1410,7 @@ mod test {
             .enumerate()
             .for_each(|(index, (expected, actual))| {
                 if expected != actual {
-                    panic!("expected {}, was {} (at {})", expected, actual, index);
+                    panic!("expected {expected}, was {actual} (at {index})");
                 }
             });
     }
