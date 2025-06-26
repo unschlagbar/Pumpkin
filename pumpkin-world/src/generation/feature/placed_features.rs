@@ -5,7 +5,7 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::iter;
 use std::ops::Deref;
-use std::sync::{Arc, LazyLock};
+use std::sync::LazyLock;
 
 use pumpkin_util::biome::FOLIAGE_NOISE;
 use pumpkin_util::math::int_provider::IntProvider;
@@ -66,7 +66,7 @@ impl PlacedFeature {
     pub async fn generate(
         &self,
         chunk: &mut ProtoChunk<'_>,
-        level: &Arc<Level>,
+        level: &Level,
         block_registry: &dyn BlockRegistryExt,
         min_y: i8,
         height: u16,

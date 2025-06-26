@@ -1,5 +1,4 @@
 use core::f32;
-use std::sync::Arc;
 
 use pumpkin_data::{
     BlockState,
@@ -29,7 +28,7 @@ impl FancyTrunkPlacer {
         height: u32,
         start_pos: BlockPos,
         chunk: &mut ProtoChunk<'_>,
-        level: &Arc<Level>,
+        level: &Level,
         random: &mut RandomGenerator,
         force_dirt: bool,
         dirt_state: &BlockState,
@@ -124,7 +123,7 @@ impl FancyTrunkPlacer {
 
     async fn make_or_check_branch(
         chunk: &mut ProtoChunk<'_>,
-        _level: &Arc<Level>,
+        _level: &Level,
         start_pos: Vector3<i32>,
         branch_pos: Vector3<i32>,
         trunk_provider: &BlockState,
@@ -200,7 +199,7 @@ impl FancyTrunkPlacer {
 
     async fn make_branches(
         chunk: &mut ProtoChunk<'_>,
-        level: &Arc<Level>,
+        level: &Level,
         tree_height: i32,
         start_pos: Vector3<i32>,
         trunk_provider: &BlockState,

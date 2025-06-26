@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use async_trait::async_trait;
 use pumpkin_data::{
     Block, BlockState,
@@ -704,7 +702,7 @@ impl<'a> ProtoChunk<'a> {
     /// 2. Then, using the second file, we determine **how** to generate the feature.
     pub async fn generate_features(
         &mut self,
-        level: &Arc<Level>,
+        level: &Level,
         block_registry: &dyn BlockRegistryExt,
     ) {
         let chunk_pos = self.chunk_pos;

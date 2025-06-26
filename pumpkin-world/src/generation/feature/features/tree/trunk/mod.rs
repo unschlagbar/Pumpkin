@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use fancy::FancyTrunkPlacer;
 use pumpkin_data::{Block, BlockState, tag::Tagable};
 use pumpkin_util::{
@@ -97,7 +95,7 @@ impl TrunkPlacer {
         height: u32,
         start_pos: BlockPos,
         chunk: &mut ProtoChunk<'_>,
-        level: &Arc<Level>,
+        level: &Level,
         random: &mut RandomGenerator,
         force_dirt: bool,
         dirt_state: &BlockState,
@@ -150,7 +148,7 @@ impl TrunkType {
         height: u32,
         start_pos: BlockPos,
         chunk: &mut ProtoChunk<'_>,
-        level: &Arc<Level>,
+        level: &Level,
         random: &mut RandomGenerator,
         force_dirt: bool,
         dirt_state: &BlockState,

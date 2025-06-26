@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use decorator::TreeDecorator;
 use foliage::FoliagePlacer;
 use pumpkin_data::{Block, BlockState, tag::Tagable};
@@ -41,7 +39,7 @@ impl TreeFeature {
     pub async fn generate(
         &self,
         chunk: &mut ProtoChunk<'_>,
-        level: &Arc<Level>,
+        level: &Level,
         min_y: i8,
         height: u16,
         feature_name: &str, // This placed feature
@@ -78,7 +76,7 @@ impl TreeFeature {
     async fn generate_main(
         &self,
         chunk: &mut ProtoChunk<'_>,
-        level: &Arc<Level>,
+        level: &Level,
         _min_y: i8,
         _height: u16,
         _feature_name: &str, // This placed feature

@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use acacia::AcaciaFoliagePlacer;
 use blob::BlobFoliagePlacer;
 use bush::BushFoliagePlacer;
@@ -81,7 +79,7 @@ impl FoliagePlacer {
     pub async fn generate_square<T: LeaveValidator>(
         validator: &T,
         chunk: &mut ProtoChunk<'_>,
-        level: &Arc<Level>,
+        level: &Level,
         random: &mut RandomGenerator,
         center_pos: BlockPos,
         radius: i32,
@@ -106,7 +104,7 @@ impl FoliagePlacer {
     pub async fn generate(
         &self,
         chunk: &mut ProtoChunk<'_>,
-        level: &Arc<Level>,
+        level: &Level,
         random: &mut RandomGenerator,
         node: &TreeNode,
         foliage_height: i32,
@@ -134,7 +132,7 @@ impl FoliagePlacer {
 
     pub async fn place_foliage_block(
         chunk: &mut ProtoChunk<'_>,
-        _level: &Arc<Level>,
+        _level: &Level,
         pos: BlockPos,
         block_state: &BlockState,
     ) {
@@ -182,7 +180,7 @@ impl FoliageType {
     pub async fn generate(
         &self,
         chunk: &mut ProtoChunk<'_>,
-        level: &Arc<Level>,
+        level: &Level,
         random: &mut RandomGenerator,
         node: &TreeNode,
         foliage_height: i32,

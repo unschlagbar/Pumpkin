@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use pumpkin_data::BlockState;
 use pumpkin_util::{
     math::{int_provider::IntProvider, position::BlockPos},
@@ -22,7 +20,7 @@ impl RandomSpreadFoliagePlacer {
     pub async fn generate(
         &self,
         chunk: &mut ProtoChunk<'_>,
-        level: &Arc<Level>,
+        level: &Level,
         random: &mut RandomGenerator,
         _node: &TreeNode,
         foliage_height: i32,

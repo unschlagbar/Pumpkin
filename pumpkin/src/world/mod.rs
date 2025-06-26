@@ -1144,7 +1144,7 @@ impl World {
         if player
             .client
             .closed
-            .load(std::sync::atomic::Ordering::Relaxed)
+            .load(Ordering::Relaxed)
         {
             log::info!("The connection has closed before world chunks were spawned");
             return;
@@ -1159,8 +1159,7 @@ impl World {
             let rel_z = pos.z - center_chunk.z;
             rel_x * rel_x + rel_z * rel_z
         });
-
-        let mut receiver = self.level.receive_chunks(chunks.clone());
+        let chunks2 = chunks.clone();
 
         let level = self.level.clone();
         let player1 = player.clone();
@@ -1168,21 +1167,14 @@ impl World {
         let world1 = self.clone();
 
         player.clone().spawn_task(async move {
-            'main: loop {
-                let recv_result = tokio::select! {
-                    () = player.client.await_close_interrupt() => {
-                        log::debug!("Canceling player packet processing");
-                        None
-                    },
-                    recv_result = receiver.recv() => {
-                        recv_result
-                    }
-                };
-
-                let Some((chunk, first_load)) = recv_result else {
+            'main: for chunk_pos in chunks2 {
+                
+                if player.client.closed.load(Ordering::Relaxed) {
+                    log::debug!("Canceling player chunk processing");
                     break;
-                };
+                }
 
+                let (chunk, first_load) = level.fetch_chunk(chunk_pos).await;
                 let position = chunk.read().await.position;
 
                 #[cfg(debug_assertions)]

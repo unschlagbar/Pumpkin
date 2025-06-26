@@ -204,8 +204,9 @@ impl PumpkinServer {
     pub async fn new() -> Self {
         let server = Arc::new(Server::new().await);
 
-        for world in &*server.worlds.read().await {
-            world.level.read_spawn_chunks(&Server::spawn_chunks()).await;
+        for world in &mut *server.worlds.write().await {
+            let level = &mut world.level;
+            level.read_spawn_chunks(&Server::spawn_chunks()).await;
         }
 
         // Setup the TCP server socket.

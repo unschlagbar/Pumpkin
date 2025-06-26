@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use pumpkin_data::BlockState;
 use pumpkin_util::{
     math::int_provider::IntProvider,
@@ -25,7 +23,7 @@ impl CherryFoliagePlacer {
     pub async fn generate(
         &self,
         chunk: &mut ProtoChunk<'_>,
-        level: &Arc<Level>,
+        level: &Level,
         random: &mut RandomGenerator,
         node: &TreeNode,
         foliage_height: i32,

@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use pumpkin_data::{BlockDirection, BlockState};
 use pumpkin_util::{
     math::{int_provider::IntProvider, position::BlockPos},
@@ -27,7 +25,7 @@ impl BendingTrunkPlacer {
         height: u32,
         start_pos: BlockPos,
         chunk: &mut ProtoChunk<'_>,
-        _level: &Arc<Level>,
+        _level: &Level,
         random: &mut RandomGenerator,
         force_dirt: bool,
         dirt_state: &BlockState,

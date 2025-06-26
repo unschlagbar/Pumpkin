@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use pumpkin_data::BlockState;
 use pumpkin_util::random::{RandomGenerator, RandomImpl};
 use serde::Deserialize;
@@ -16,7 +14,7 @@ impl DarkOakFoliagePlacer {
     pub async fn generate(
         &self,
         chunk: &mut ProtoChunk<'_>,
-        level: &Arc<Level>,
+        level: &Level,
         random: &mut RandomGenerator,
         node: &TreeNode,
         _foliage_height: i32,

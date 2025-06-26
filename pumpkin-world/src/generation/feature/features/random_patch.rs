@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use pumpkin_util::{
     math::{position::BlockPos, vector3::Vector3},
     random::{RandomGenerator, RandomImpl},
@@ -24,7 +22,7 @@ impl RandomPatchFeature {
     pub async fn generate(
         &self,
         chunk: &mut ProtoChunk<'_>,
-        level: &Arc<Level>,
+        level: &Level,
         block_registry: &dyn BlockRegistryExt,
         min_y: i8,
         height: u16,

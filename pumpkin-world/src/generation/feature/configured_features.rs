@@ -1,6 +1,6 @@
 use std::{
     collections::HashMap,
-    sync::{Arc, LazyLock},
+    sync::LazyLock,
 };
 
 use pumpkin_util::{math::position::BlockPos, random::RandomGenerator};
@@ -216,7 +216,7 @@ impl ConfiguredFeature {
     pub async fn generate(
         &self,
         chunk: &mut ProtoChunk<'_>,
-        level: &Arc<Level>,
+        level: &Level,
         block_registry: &dyn BlockRegistryExt,
         min_y: i8,
         height: u16,

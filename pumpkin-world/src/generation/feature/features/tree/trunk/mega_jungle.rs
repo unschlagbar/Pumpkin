@@ -1,5 +1,4 @@
 use core::f32;
-use std::sync::Arc;
 
 use pumpkin_data::BlockState;
 use pumpkin_util::{
@@ -27,7 +26,7 @@ impl MegaJungleTrunkPlacer {
         height: u32,
         start_pos: BlockPos,
         chunk: &mut ProtoChunk<'_>,
-        level: &Arc<Level>,
+        level: &Level,
         random: &mut RandomGenerator,
         force_dirt: bool,
         dirt_state: &BlockState,
